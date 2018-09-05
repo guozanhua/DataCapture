@@ -1,0 +1,13 @@
+F:\work\DataCollection\DataCollection\bin\Debug\DataCollection.exe.config
+F:\work\DataCollection\DataCollection\bin\Debug\DataCollection.exe
+F:\work\DataCollection\DataCollection\bin\Debug\DataCollection.pdb
+F:\work\DataCollection\DataCollection\bin\Debug\HtmlAgilityPack.dll
+F:\work\DataCollection\DataCollection\bin\Debug\HtmlAgilityPack.pdb
+F:\work\DataCollection\DataCollection\bin\Debug\HtmlAgilityPack.xml
+F:\work\DataCollection\DataCollection\obj\Debug\DataCollection.csprojResolveAssemblyReference.cache
+F:\work\DataCollection\DataCollection\obj\Debug\DataCollection.Form1.resources
+F:\work\DataCollection\DataCollection\obj\Debug\DataCollection.Properties.Resources.resources
+F:\work\DataCollection\DataCollection\obj\Debug\DataCollection.csproj.GenerateResource.Cache
+F:\work\DataCollection\DataCollection\obj\Debug\DataCollection.exe
+F:\work\DataCollection\DataCollection\obj\Debug\DataCollection.pdb
+F:\work\DataCollection\DataCollection\obj\Debug\DataCollection.Form2.resources

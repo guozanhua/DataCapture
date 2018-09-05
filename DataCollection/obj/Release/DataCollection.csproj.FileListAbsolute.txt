@@ -1,0 +1,13 @@
+F:\work\DataCollection\DataCollection\bin\Release\DataCollection.exe.config
+F:\work\DataCollection\DataCollection\bin\Release\DataCollection.exe
+F:\work\DataCollection\DataCollection\bin\Release\DataCollection.pdb
+F:\work\DataCollection\DataCollection\bin\Release\HtmlAgilityPack.dll
+F:\work\DataCollection\DataCollection\bin\Release\HtmlAgilityPack.pdb
+F:\work\DataCollection\DataCollection\bin\Release\HtmlAgilityPack.xml
+F:\work\DataCollection\DataCollection\obj\Release\DataCollection.Properties.Resources.resources
+F:\work\DataCollection\DataCollection\obj\Release\DataCollection.csproj.GenerateResource.Cache
+F:\work\DataCollection\DataCollection\obj\Release\DataCollection.exe
+F:\work\DataCollection\DataCollection\obj\Release\DataCollection.pdb
+F:\work\DataCollection\DataCollection\obj\Release\DataCollection.csprojResolveAssemblyReference.cache
+F:\work\DataCollection\DataCollection\obj\Release\DataCollection.Dianping.resources
+F:\work\DataCollection\DataCollection\obj\Release\DataCollection.ZhaoBiao.resources
