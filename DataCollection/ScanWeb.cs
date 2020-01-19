@@ -114,8 +114,7 @@ User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/6
             #region 添加Post 参数  
             if (contentEncode == null)
             {
-                //contentEncode = Encoding.UTF8;
-                contentEncode = Encoding.GetEncoding("GBK");
+                contentEncode = Encoding.UTF8;
             }
             if (!string.IsNullOrWhiteSpace(content))
             {
@@ -404,16 +403,11 @@ User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/6
                 if (contentType.ToLower().Contains("gb2312"))
                 {
                     defaultEncode = Encoding.GetEncoding("gb2312");
-                }
-                else if (contentType.ToLower().Contains("gbk"))
-                {
-                    defaultEncode = Encoding.GetEncoding("gbk");
-                }
+                } 
                 else if (contentType.ToLower().Contains("zh-cn"))
                 {
                     defaultEncode = Encoding.GetEncoding("zh-cn");
-                }
-                defaultEncode = Encoding.GetEncoding("gbk");
+                } 
             }
 
             string responseBody = string.Empty;

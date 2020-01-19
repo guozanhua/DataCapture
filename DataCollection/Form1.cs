@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,6 +22,17 @@ namespace DataCollection
             InitializeComponent();
         }
 
+        public class Article
+        {
+            public int fromid { get; set; }
+            public string origin_url { get; set; }
+            public string name { get; set; }
+            public string book_type { get; set; }
+            public string desc { get; set; }
+            public string author { get; set; }
+        }
+
+        List<Article> articles = new List<Article>();
         private void button1_Click(object sender, EventArgs e)
         {
             try
@@ -35,18 +47,63 @@ namespace DataCollection
                 //string url = "http://www.jianlaixiaoshuo.com/book/1.html";
                 //string url = "http://www.quanshuwang.com/all/allvisit_0_0_0_0_1_0_{0}.html";
                 string url = this.txtLink.Text;
-                 
-                string htmlstr = GetHtmlStr(url);
-                 
 
-                GrabData(htmlstr,"");
+                //写入章节
+                string htmlstr = GetHtmlStr(url);
+                GrabData(htmlstr);
+
+
+                ///写入书名表
+                //for (int j = 1; j <= 200; j++)
+                //{
+
+                //    string htmlstr = PostHtmlStr(url, j);
+
+                //    if (!string.IsNullOrWhiteSpace(htmlstr))
+                //    {
+
+
+                //        JObject jsonObj = JObject.Parse(htmlstr);
+
+                //        var arraylist = (JArray)(((JObject)jsonObj["data"])["book"]);
+                //        for (int i = 0; i < arraylist.Count; i++)
+                //        {
+                //            Article article = new Article();
+                //            article.fromid = int.Parse(arraylist[i]["id"].ToString());
+                //            article.origin_url = arraylist[i]["OriginUrl"].ToString();
+                //            article.name = arraylist[i]["name"].ToString();
+                //            article.book_type = arraylist[i]["bookType"].ToString();
+                //            article.desc = arraylist[i]["description"].ToString(); 
+                //            article.author = arraylist[i]["author"].ToString();
+
+                //            articles.Add(article);
+                //        }
+
+                //    }
+                //}
+                //int countid = 4453;
+
+                //foreach (var item in articles)
+                //{
+                //    if (item.fromid > 3594)
+                //    {
+                //        item.desc = item.desc.Replace("\\", "");
+
+                //        string insertSql = $@"insert into article values({countid++},{item.fromid},'{item.origin_url}','{item.name}','{item.book_type}','{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}',0,'{item.desc}','{item.author}')";
+
+                //        MySQLHelper.GetInstance().ExecuteNonQuery(insertSql); 
+                //    }
+                //}
 
 
             }
             catch (WebException ex)
             {
                 //连接失败
-
+                this.textBox1.Text = this.textBox1.Text + "\r\n" + "错误：" + ex.Message;
+                this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                this.textBox1.ScrollToCaret();//滚动到最后一行
+                Application.DoEvents();
             }
         }
 
@@ -55,7 +112,7 @@ namespace DataCollection
         {
             var _name = GrabTitleData(contentstr);
             string content = NoHTML(GrabContentData(contentstr));
-            string next = GrabNextData(contentstr);
+            string next = GrabNextData(contentstr).Replace("&amp;", "&");
             string dtime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             int article_id = int.Parse(this.txtNumber.Text);
 
@@ -71,24 +128,24 @@ namespace DataCollection
             Application.DoEvents();
 
             count++;
-            //if (!string.IsNullOrEmpty(next) && (next.IndexOf("last") < 0))
-            //{
-            //    try
-            //    {
-            //        string mainUrl = this.txtLink.Text.Substring(0, this.txtLink.Text.LastIndexOf('/'));
+            if (!string.IsNullOrEmpty(next) && (next.IndexOf("last") < 0))
+            {
+                try
+                {
+                    string mainUrl = this.txtLink.Text.Substring(0, this.txtLink.Text.LastIndexOf('/'));
 
-            //        GrabData(GetHtmlStr(mainUrl + next));
+                    GrabData(GetHtmlStr("http://175.24.134.140:1111" + next));
 
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        this.textBox1.Text = this.textBox1.Text + "\r\n" + "错误：" + ex.Message;
-            //        this.textBox1.Text = this.textBox1.Text + "\r\n" + "当前url：" + next;
-            //        this.textBox1.SelectionStart = this.textBox1.Text.Length;
-            //        this.textBox1.ScrollToCaret();//滚动到最后一行
-            //        Application.DoEvents();
-            //    }
-            //}
+                }
+                catch (Exception ex)
+                {
+                    this.textBox1.Text = this.textBox1.Text + "\r\n" + "错误：" + ex.Message;
+                    this.textBox1.Text = this.textBox1.Text + "\r\n" + "当前url：" + next;
+                    this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                    this.textBox1.ScrollToCaret();//滚动到最后一行
+                    Application.DoEvents();
+                }
+            }
 
 
         }
@@ -172,7 +229,7 @@ namespace DataCollection
             doc.LoadHtml(htmlstr);
             HtmlNode rootnode = doc.DocumentNode;    //XPath路径表达式，这里表示选取所有span节点中的font最后一个子节点，其中span节点的class属性值为num
             //根据网页的内容设置XPath路径表达式
-            string xpathstring = "//div[@id='htmlContent']";
+            string xpathstring = "//div[@class='catalog-container']";
             HtmlNodeCollection list = rootnode.SelectNodes(xpathstring);    //所有找到的节点都是一个集合
 
             return list[0].InnerHtml;
@@ -183,7 +240,7 @@ namespace DataCollection
             doc.LoadHtml(htmlstr);
             HtmlNode rootnode = doc.DocumentNode;    //XPath路径表达式，这里表示选取所有span节点中的font最后一个子节点，其中span节点的class属性值为num
             //根据网页的内容设置XPath路径表达式
-            string xpathstring = "//div[@id='htmlmain']/h2";
+            string xpathstring = "//div[@class='catalog-name']";
             HtmlNodeCollection list = rootnode.SelectNodes(xpathstring);    //所有找到的节点都是一个集合
 
             return list[0].InnerHtml;
@@ -197,11 +254,11 @@ namespace DataCollection
                 doc.LoadHtml(htmlstr);
                 HtmlNode rootnode = doc.DocumentNode;    //XPath路径表达式，这里表示选取所有span节点中的font最后一个子节点，其中span节点的class属性值为num
                                                          //根据网页的内容设置XPath路径表达式
-                string xpathstring = "//div[@id='upPage']/a";
+                string xpathstring = "//header/a[@class='por']";
                 HtmlNodeCollection list = rootnode.SelectNodes(xpathstring);    //所有找到的节点都是一个集合
-                if (list[list.Count - 1].InnerHtml == "下一张")
+                if (list != null)
                 {
-                    return list[list.Count - 1].GetAttributeValue("href", "");
+                    return list[0].GetAttributeValue("href", "");
                 }
                 else
                 {
@@ -224,35 +281,70 @@ namespace DataCollection
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static string GetHtmlStr(string url)
+        public static string PostHtmlStr(string url, int pageIndex = 1)
         {
             try
             {
 
                 //GetToken("http://www.dianping.com");
 
+                string heads = $@"Accept: application/json, text/plain, */*
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.9
+Connection: keep-alive
+Content-Length: 62
+Content-Type: application/x-www-form-urlencoded
+Host: 175.24.134.140:3000
+Origin: http://175.24.134.140:9092
+Referer: http://175.24.134.140:9092/home?page=1&limit=200
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36";
+
                 //                string heads = $@"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
                 //Accept-Encoding: gzip, deflate
                 //Accept-Language: zh-CN,zh;q=0.9
                 //Cache-Control: max-age=0
                 //Connection: keep-alive
-                //Host: www.jianlaixiaoshuo.com
-                //If-Modified-Since: Fri, 17 Jan 2020 12:39:42 GMT
-                //If-None-Match: {0}
+                //Cookie: token=686423fd8acc14fecc03466ffc94fb2c06e9236e; user={aaa}; access=1000%2C2000%2C3000%2C4000%2C5000%2C6000%2C7000%2C8000%2C4010; shrink=; bookIds=314; huyan=true; light=true; fontSize=small
+                //Host: 175.24.134.140:1111
                 //Upgrade-Insecure-Requests: 1
-                //User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36";
+                //User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36";
 
-                string aaa = "{\"sz\":\"16\",\"bg\":\"day-bg\",\"help\":\"1\"}";
+
+                HttpRequestClient sc = new HttpRequestClient(true);
+
+                string content = $"page={pageIndex}&limit=200&token=686423fd8acc14fecc03466ffc94fb2c06e9236e";
+
+                var response = sc.httpPost(url, heads, content, Encoding.UTF8);
+                return response;
+
+            }
+            catch (WebException ex)
+            {
+                //连接失败
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 获取请求返回的html字符串
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static string GetHtmlStr(string url)
+        {
+            try
+            {
+                string aaa = "{%22id%22:121%2C%22name%22:%22lijun%22%2C%22mobile%22:%2218516063170%22%2C%22roleName%22:%22%E8%B6%85%E7%BA%A7%E7%AE%A1%E7%90%86%E5%91%98%22%2C%22permission%22:%221000%2C2000%2C3000%2C4000%2C5000%2C6000%2C7000%2C8000%2C4010%22%2C%22roleId%22:1}";
 
                 string heads = $@"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
-Accept-Encoding: gzip, deflate
-Accept-Language: zh-CN,zh;q=0.9
-Connection: keep-alive
-Cookie: fikker-5RMI-wKqx=uBJMat385O9HQj5f7IUjJTqREtWdMTSI; UM_distinctid=16fb878f95728d-0f3737fcac4a1e-6701b35-13c680-16fb878f95840a; CNZZDATA1262155963=2124321761-1579345171-null%7C1579345171; jieqiVisitId=article_articleviews%3D16860; iCast_Rotator_1_1=1579348132991; ReadSet={aaa}; jieqiHistoryBooks=%5B%7B%22articleid%22%3A%2216860%22%2C%22articlename%22%3A%22%u603B%u88C1%u7684%u65B0%u9C9C%u5C0F%u59BB%u5B50%22%2C%22chapterid%22%3A%226264619%22%2C%22chaptername%22%3A%22%u7B2C%u4E00%u5377%20%u7B2C1%u7AE0%20%u521D%u76F8%u9047%22%7D%5D; iCast_Rotator_1_2=1579348223684; CNZZDATA1273371515=339438370-1579342777-null%7C1579348221; iCast_Rotator_1_3=1579348231657
-Host: m.quanshuwang.com
-Referer: http://m.quanshuwang.com/list/16860_1.html
-Upgrade-Insecure-Requests: 1
-User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1";
+                Accept-Encoding: gzip, deflate
+                Accept-Language: zh-CN,zh;q=0.9
+                Cache-Control: max-age=0
+                Connection: keep-alive
+                Cookie: token=686423fd8acc14fecc03466ffc94fb2c06e9236e; user={aaa}; access=1000%2C2000%2C3000%2C4000%2C5000%2C6000%2C7000%2C8000%2C4010; shrink=; bookIds=314; huyan=true; light=true; fontSize=small
+                Host: 175.24.134.140:1111
+                Upgrade-Insecure-Requests: 1
+                User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36";
 
 
                 HttpRequestClient sc = new HttpRequestClient(true);
