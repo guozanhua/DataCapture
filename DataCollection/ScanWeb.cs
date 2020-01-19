@@ -37,14 +37,14 @@ namespace DataCollection
         /// <summary>
         /// 默认的头
         /// </summary>
-        public static string defaultHeaders = @"Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-Accept-Encoding:gzip, deflate, sdch
-Accept-Language:zh-CN,zh;q=0.8
-Cache-Control:no-cache
-Connection:keep-alive
-Pragma:no-cache
-Upgrade-Insecure-Requests:1
-User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36";
+        public static string defaultHeaders = @"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.9
+Connection: keep-alive
+Host: m.jianlaixiaoshuo.com
+Referer: http://www.jianlaixiaoshuo.com/
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1";
 
         /// <summary>
         /// 是否跟踪cookies
@@ -114,7 +114,8 @@ User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like G
             #region 添加Post 参数  
             if (contentEncode == null)
             {
-                contentEncode = Encoding.UTF8;
+                //contentEncode = Encoding.UTF8;
+                contentEncode = Encoding.GetEncoding("GBK");
             }
             if (!string.IsNullOrWhiteSpace(content))
             {
@@ -412,6 +413,7 @@ User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like G
                 {
                     defaultEncode = Encoding.GetEncoding("zh-cn");
                 }
+                defaultEncode = Encoding.GetEncoding("gbk");
             }
 
             string responseBody = string.Empty;
@@ -419,7 +421,7 @@ User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like G
             {
                 using (GZipStream stream = new GZipStream(response.GetResponseStream(), CompressionMode.Decompress))
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    using (StreamReader reader = new StreamReader(stream, defaultEncode))
                     {
                         responseBody = reader.ReadToEnd();
                     }

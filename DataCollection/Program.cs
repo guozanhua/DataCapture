@@ -16,7 +16,7 @@ namespace DataCollection
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ZhaoBiao());
+            Application.Run(new Form1());
         }
     }
 }
