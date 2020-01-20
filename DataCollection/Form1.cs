@@ -48,10 +48,58 @@ namespace DataCollection
                 //string url = "http://www.quanshuwang.com/all/allvisit_0_0_0_0_1_0_{0}.html";
                 string url = this.txtLink.Text;
 
-                //写入章节
-                string htmlstr = GetHtmlStr(url);
-                GrabData(htmlstr);
+                ////写入章节
+                //string htmlstr = GetHtmlStr(url);
+                //GrabData(htmlstr);
 
+                #region 写入章节
+
+                //获取数据库中的待处理的文章列表
+                string articlesql = $"SELECT id,from_id from article where id>={int.Parse(this.txtNumber.Text)}";
+                var dt = MySQLHelper.GetInstance().ExecuteDataTable(articlesql);
+                var link = "http://175.24.134.140:1111/book/catalog?bookId=";
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    count = 1;
+
+                    var article_id = int.Parse(dt.Rows[i]["from_id"].ToString());
+                    var caid = dt.Rows[i]["id"].ToString();
+                    this.txtNumber.Text = caid;
+                    Application.DoEvents();
+
+                    url = link + article_id;
+
+                    string htmlstr = GetHtmlStr(url);
+
+                    //获取章节首页
+                    url = GetChapterIndexLink(htmlstr);
+
+                    url = url.Replace("&amp;", "&");
+
+                    string htmlstr2 = GetHtmlStr("http://175.24.134.140:1111" + url);
+
+                    try
+                    {
+
+                        GrabData(htmlstr2);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.textBox1.Text = this.textBox1.Text + "\r\n" + "错误：" + ex.Message; 
+                        this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                        this.textBox1.ScrollToCaret();//滚动到最后一行
+                    }
+
+                     
+                }
+
+
+
+                #endregion
+
+
+                #region 写入书名
 
                 ///写入书名表
                 //for (int j = 1; j <= 200; j++)
@@ -95,6 +143,7 @@ namespace DataCollection
                 //    }
                 //}
 
+                #endregion
 
             }
             catch (WebException ex)
@@ -105,6 +154,18 @@ namespace DataCollection
                 this.textBox1.ScrollToCaret();//滚动到最后一行
                 Application.DoEvents();
             }
+        }
+
+        private string GetChapterIndexLink(string htmlstr)
+        {
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(htmlstr);
+            HtmlNode rootnode = doc.DocumentNode;    //XPath路径表达式，这里表示选取所有span节点中的font最后一个子节点，其中span节点的class属性值为num
+            //根据网页的内容设置XPath路径表达式
+            string xpathstring = "//ul[@class='catalog-list']/li/a";
+            //string xpathstring = "//div[@class='inner']/dl[@class='chapterlist']/dd/a";
+            HtmlNodeCollection list = rootnode.SelectNodes(xpathstring);    //所有找到的节点都是一个集合
+            return list[0].GetAttributeValue("href", "");
         }
 
         int count = 1;
@@ -121,18 +182,16 @@ namespace DataCollection
             //Task.Run(() => {
             MySQLHelper.GetInstance().ExecuteNonQuery(insertChapter);
             //});
-
-            this.textBox1.Text = this.textBox1.Text + "\r\n" + "写入" + _name + "," + dtime;
-            this.textBox1.SelectionStart = this.textBox1.Text.Length;
-            this.textBox1.ScrollToCaret();//滚动到最后一行
-            Application.DoEvents();
+             
+            //this.txtLink.Text = _name;
+            //Application.DoEvents();
 
             count++;
             if (!string.IsNullOrEmpty(next) && (next.IndexOf("last") < 0))
             {
                 try
                 {
-                    string mainUrl = this.txtLink.Text.Substring(0, this.txtLink.Text.LastIndexOf('/'));
+                    //string mainUrl = this.txtLink.Text.Substring(0, this.txtLink.Text.LastIndexOf('/'));
 
                     GrabData(GetHtmlStr("http://175.24.134.140:1111" + next));
 
@@ -369,22 +428,25 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
         {
             //删除脚本  
             Htmlstring = Regex.Replace(Htmlstring, @"<script[^>]*?>.*?</script>", "", RegexOptions.IgnoreCase);
-            ////删除HTML  
+            //删除HTML  
             //Htmlstring = Regex.Replace(Htmlstring, @"<(.[^>]*)>", "", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"([\r\n])[\s]+", "", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"-->", "", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"<!--.*", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"([\r\n])[\s]+", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"-->", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"<!--.*", "", RegexOptions.IgnoreCase);
 
-            //Htmlstring = Regex.Replace(Htmlstring, @"&(quot|#34);", "\"", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"&(amp|#38);", "&", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"&(lt|#60);", "<", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"&(gt|#62);", ">", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"&(nbsp|#160);", "   ", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"&(iexcl|#161);", "\xa1", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"&(cent|#162);", "\xa2", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"&(pound|#163);", "\xa3", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"&(copy|#169);", "\xa9", RegexOptions.IgnoreCase);
-            //Htmlstring = Regex.Replace(Htmlstring, @"&#(\d+);", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(quot|#34);", "\"", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(amp|#38);", "&", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(lt|#60);", "<", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(gt|#62);", ">", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(nbsp|#160);", "   ", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(iexcl|#161);", "\xa1", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(cent|#162);", "\xa2", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(pound|#163);", "\xa3", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(copy|#169);", "\xa9", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&#(\d+);", "", RegexOptions.IgnoreCase);
+
+            Htmlstring = Regex.Replace(Htmlstring, @"'", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"’", "", RegexOptions.IgnoreCase);
 
             //Htmlstring.Replace("<", "");
             //Htmlstring.Replace(">", "");

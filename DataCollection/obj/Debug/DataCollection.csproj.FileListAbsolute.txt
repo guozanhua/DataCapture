@@ -35,7 +35,6 @@ D:\git\DataCapture\DataCapture\DataCollection\bin\Debug\HtmlAgilityPack.dll
 D:\git\DataCapture\DataCapture\DataCollection\bin\Debug\MySql.Data.dll
 D:\git\DataCapture\DataCapture\DataCollection\bin\Debug\HtmlAgilityPack.pdb
 D:\git\DataCapture\DataCapture\DataCollection\bin\Debug\HtmlAgilityPack.xml
-D:\git\DataCapture\DataCapture\DataCollection\obj\Debug\DataCollection.csprojAssemblyReference.cache
 D:\git\DataCapture\DataCapture\DataCollection\obj\Debug\DataCollection.Dianping.resources
 D:\git\DataCapture\DataCapture\DataCollection\obj\Debug\DataCollection.Form1.resources
 D:\git\DataCapture\DataCapture\DataCollection\obj\Debug\DataCollection.ZhaoBiao.resources
@@ -47,3 +46,4 @@ D:\git\DataCapture\DataCapture\DataCollection\obj\Debug\DataCollection.exe
 D:\git\DataCapture\DataCapture\DataCollection\obj\Debug\DataCollection.pdb
 D:\git\DataCapture\DataCapture\DataCollection\bin\Debug\Newtonsoft.Json.dll
 D:\git\DataCapture\DataCapture\DataCollection\bin\Debug\Newtonsoft.Json.xml
+D:\git\DataCapture\DataCapture\DataCollection\obj\Debug\DataCollection.csprojAssemblyReference.cache
