@@ -65,6 +65,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DBHelper.cs" />
+    <Compile Include="Fengyue.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Fengyue.Designer.cs">
+      <DependentUpon>Fengyue.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -89,6 +95,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Dianping.resx">
       <DependentUpon>Dianping.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Fengyue.resx">
+      <DependentUpon>Fengyue.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
