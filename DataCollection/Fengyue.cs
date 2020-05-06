@@ -29,7 +29,7 @@ namespace DataCollection
 
                 string url = $"http://www.h528.com/post/category/{module}";
 
-                Search(url, module,1);
+                Search(url, module, 60);
 
                 ////写入章节
                 //string htmlstr = GetHtmlStr(url);
@@ -51,21 +51,39 @@ namespace DataCollection
         {
             try
             {
-
+                string htmlstr = "";
 
                 for (int i = 1; i <= count; i++)
-                {
-                    if (i==1)
+                { 
+                    try
                     {
-                        string htmlstr = GetHtmlStr(url);
-                        GrabData(htmlstr, module);
+                        this.textBox1.Text = this.textBox1.Text + "\r\n" + $"查询第:[{i}] 页数据";
+                        this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                        this.textBox1.ScrollToCaret();//滚动到最后一行
+                        Application.DoEvents();
+
+
+                        if (i == 1)
+                        {
+                             htmlstr = GetHtmlStr(url);
+                            GrabData(htmlstr, module);
+                        }
+                        else
+                        {
+                             htmlstr = GetHtmlStr(url + "/page/" + i);
+                            GrabData(htmlstr, module);
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        string htmlstr = GetHtmlStr(url + "/page/" + i);
-                        GrabData(htmlstr, module); 
+                        this.textBox1.Text = this.textBox1.Text + "\r\n" + $"报错:[{ex.Message}]";
+                        this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                        this.textBox1.ScrollToCaret();//滚动到最后一行
+                        Application.DoEvents();
                     }
+
                     
+
 
                     //System.Threading.Thread.Sleep(1000);
                 }
@@ -73,7 +91,7 @@ namespace DataCollection
                 MessageBox.Show(module + "操作完毕，" + count + "页数据");
             }
             catch (Exception ex)
-            {
+            { 
                 MessageBox.Show(ex.Message);
             }
         }
@@ -92,14 +110,11 @@ namespace DataCollection
                 string heads = $@"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
 Accept-Encoding: gzip, deflate
 Accept-Language: zh-CN,zh;q=0.9
-Cache-Control: max-age=0
-Cookie: sc_is_visitor_unique=rx2315234.1588758481.2B09006F13284FC5625B7F9D689A3508.1.1.1.1.1.1.1.1.1
+Cookie: sc_is_visitor_unique=rx2315234.1588770685.05827513433E4F5F5A2A1E1D48145FCA.4.3.3.3.3.3.2.2.2
 Host: www.h528.com
-If-Modified-Since: Wed, 06 May 2020 06:48:33 GMT
 Proxy-Connection: keep-alive
-Referer: http://www.h528.com/
 Upgrade-Insecure-Requests: 1
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36";
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36";
 
 
                 HttpRequestClient sc = new HttpRequestClient(true);
@@ -120,7 +135,7 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
         /// <param name="htmlstr"></param>
         /// <param name="zone"></param>
         /// <param name="module"></param>
-        private void GrabData(string htmlstr, string module )
+        private void GrabData(string htmlstr, string module)
         {
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(htmlstr);
@@ -129,20 +144,55 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
             //string xpathstring = "//div[@id='content']/div[@class='post']/a[@rel='bookmark']";
             string xpathstring = "//a[@rel='bookmark']";
             HtmlNodeCollection list = rootnode.SelectNodes(xpathstring);    //所有找到的节点都是一个集合
-              
+
             foreach (var item in list)
             {
                 var link = item.GetAttributeValue("href", "");
                 var title = item.InnerText;
+                string contentStr = "";
 
-                string contentStr = GetHtmlStr(link);
+                //判断是否存在
+                string selSql = $"select count(*) from article where origin_url like '%{link}%'";
 
-                GrabData(contentStr, link, title, module);
+                int res = MySQLHelper.GetInstance().ExecuteScalar(selSql);
+                if (res > 0)
+                {
+                    continue;
+                }
+                try
+                {
+                    string dtime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    string insertChapter = $"insert into article(origin_url,name,book_type,create_time,content) values('{link}','{title}','{module}','{dtime}','')";
 
-            } 
-             
+                    //Task.Run(() => {
+                    MySQLHelper.GetInstance().ExecuteNonQuery(insertChapter);
+                    //});
+
+                    this.textBox1.Text = this.textBox1.Text + "\r\n" + $"写入:[{module}] {title},链接地址:{link},{dtime}";
+                    this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                    this.textBox1.ScrollToCaret();//滚动到最后一行
+                    Application.DoEvents();
+
+                    //contentStr = GetHtmlStr(link);
+
+                    //if (contentStr != "")
+                    //{
+
+                    //    GrabData(contentStr, link, title, module);
+
+                    //}
+                }
+                catch (Exception ex)
+                {
+                    this.textBox1.Text = this.textBox1.Text + "\r\n" + $"报错:[{ex.Message}] ,link:{link},title:{title},contentStr:{contentStr}";
+                    this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                    this.textBox1.ScrollToCaret();//滚动到最后一行
+                    Application.DoEvents();
+                }
+            }
+
         }
-        private void GrabData(string contentstr ,string link,string title,string module)
+        private void GrabData(string contentstr, string link, string title, string module)
         {
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(contentstr);
@@ -150,21 +200,23 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
             //根据网页的内容设置XPath路径表达式
             string xpathstring = "//div[@class='entry']";
             HtmlNodeCollection list = rootnode.SelectNodes(xpathstring);    //所有找到的节点都是一个集合
-             
-            string content = NoHTML(list[0].InnerHtml);  
+
+            string content = NoHTML(list[0].InnerHtml);
             string dtime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            
+
 
             string insertChapter = $"insert into article(origin_url,name,book_type,create_time,content) values('{link}','{title}','{module}','{dtime}','{content}')";
 
             //Task.Run(() => {
             MySQLHelper.GetInstance().ExecuteNonQuery(insertChapter);
             //});
-            
+
             this.textBox1.Text = this.textBox1.Text + "\r\n" + $"写入:[{module}] {title},链接地址:{link},{dtime}";
             this.textBox1.SelectionStart = this.textBox1.Text.Length;
             this.textBox1.ScrollToCaret();//滚动到最后一行
             Application.DoEvents();
+
+           // System.Threading.Thread.Sleep(1000);
 
         }
         public static string NoHTML(string Htmlstring)
@@ -197,6 +249,80 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
             //Htmlstring = HttpUtility.HtmlDecode(Htmlstring).Replace("<br/>", "").Replace("<br>", "").Trim();
 
             return Htmlstring;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string selSql = $"select id,origin_url from article where content=''";
+
+            //Task.Run(() => {
+            var dt= MySQLHelper.GetInstance().ExecuteDataTable(selSql);
+
+            if (dt!=null && dt.Rows.Count>0)
+            {
+                this.textBox1.Text = this.textBox1.Text + "\r\n" + $"查询到需要更新的条目数:[{dt.Rows.Count}]";
+                this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                this.textBox1.ScrollToCaret();//滚动到最后一行
+                Application.DoEvents();
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    this.textBox1.Text = this.textBox1.Text + "\r\n" + $"处理第:[{(i+1)}]条";
+                    this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                    this.textBox1.ScrollToCaret();//滚动到最后一行
+                    Application.DoEvents();
+
+                    var dtrow = dt.Rows[i];
+                    string link = dtrow["origin_url"].ToString();
+                    string id = dtrow["id"].ToString();
+
+                    try
+                    {
+                        string contentStr = GetHtmlStr(link);
+
+                        if (contentStr != "")
+                        {
+                            UpdateContent(contentStr, link, id);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.textBox1.Text = this.textBox1.Text + "\r\n" + $"错误:[{ex.Message}]条";
+                        this.textBox1.SelectionStart = this.textBox1.Text.Length;
+                        this.textBox1.ScrollToCaret();//滚动到最后一行
+                        Application.DoEvents();
+                    }
+
+                    
+                }
+            }
+        }
+        private void UpdateContent(string contentstr, string link,string id)
+        {
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(contentstr);
+            HtmlNode rootnode = doc.DocumentNode;    //XPath路径表达式，这里表示选取所有span节点中的font最后一个子节点，其中span节点的class属性值为num
+            //根据网页的内容设置XPath路径表达式
+            string xpathstring = "//div[@class='entry']";
+            HtmlNodeCollection list = rootnode.SelectNodes(xpathstring);    //所有找到的节点都是一个集合
+
+            string content = NoHTML(list[0].InnerHtml);
+            string dtime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+
+            string insertChapter = $"update article set content = '{content}' where id={id}";
+
+            //Task.Run(() => {
+            MySQLHelper.GetInstance().ExecuteNonQuery(insertChapter);
+            //});
+
+            this.textBox1.Text = this.textBox1.Text + "\r\n" + $"更新:[{id}]";
+            this.textBox1.SelectionStart = this.textBox1.Text.Length;
+            this.textBox1.ScrollToCaret();//滚动到最后一行
+            Application.DoEvents();
+
+            // System.Threading.Thread.Sleep(1000);
+
         }
     }
 }

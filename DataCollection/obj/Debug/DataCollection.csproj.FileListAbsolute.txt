@@ -48,3 +48,5 @@ D:\git\DataCapture\DataCapture\DataCollection\bin\Debug\Newtonsoft.Json.dll
 D:\git\DataCapture\DataCapture\DataCollection\bin\Debug\Newtonsoft.Json.xml
 D:\git\DataCapture\DataCapture\DataCollection\obj\Debug\DataCollection.csprojAssemblyReference.cache
 D:\git\DataCapture\DataCapture\DataCollection\obj\Debug\DataCollection.Fengyue.resources
+C:\work\DataCapture\DataCollection\bin\Debug\Newtonsoft.Json.dll
+C:\work\DataCapture\DataCollection\obj\Debug\DataCollection.Fengyue.resources
